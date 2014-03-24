@@ -1,54 +1,53 @@
 #!/usr/bin/python
 # Filename: httpclient.py
 
-import os
 import sys
-import httplib as hl
+import os
+import httplib
+import urllib
 
 class httpclient:
-    '''This is a sealed http poster.
-
-    Use this class to send http request.'''
-
-    def __init__(self, url, method, header, content):
-        self.url = url
-        self.method = method
-        self.header = header
-        self.content = content
-
     def __init__(self):
         pass
-
-    def gethostofurl(self, url):
-        url = url.lstrip("htp:/ ")
-        firstslashinurl = url.find('/')
-        if firstslashinurl == -1:
-            host = url[0:]
-        else:
-            host = url[0:firstslashinurl]
-        return host
-
-    def dopost(self, host, url, header, content):
-        #TODO: implement do post method
+        
+    def __init__(self, host, port='80'):
         pass
 
-    def doget(self, host, url, header, content):
-        #TODO: implement do get method
-        conn = hl.HTTPConnction(host)
-        conn.request('GET', url, content, header)
+    def buildbody(self, content):
+        return urllib.urlencde(content)
+
+    def gethostofurl(self, url):
+        url = url.lstrip('htp:/')
+        slashindexinurl = url.find('/')
+        if slashindexinurl != -1:
+            host = url[0:slashindexinurl]
+        else:
+            host = url[0:]
+        # remove post number if exists
+        if host.find(':') > 0:
+            host = host[0:host.find(':')]
+        return host
+    
+    def doget(self, url, content, header):
+        host = self.gethostofurl(url)
+        port = '80' #TODO: Get the real port num.
+        conn = httplib.HTTPConnection(host, port)
+        conn.request('GET', url)
         resp = conn.getresponse()
         return resp
 
-    def dorequest(self, url, method, header, content):
-        #TODO: implement
-        host = gethostofurl(url)
-        if method.lower() == 'get':
-            return doget(host, url, header, content)
-        elif method.lower() == 'post':
-            return dopost(url, header, content)
- 
+    def dopost(self, url, content, header):
+        host = self.gethostofurl(url)
+        port = '80' #TODO: Get the real port num.
+        conn = httplib.HTTPConnection(host, port)
+        conn.request('POST', url)
+        resp = conn.getresponse()
+        return resp
 
-hc = httpclient()
+        
 if len(sys.argv) >= 2:
-    print hc.gethostofurl(sys.argv[1])
-
+    hc = httpclient('')
+    print hc.buildbody({'name':'nanan','age':'27'})
+    resp = hc.doget('http://www.douban.com/','','')
+    #print resp.read()
+        
