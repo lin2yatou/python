@@ -9,13 +9,20 @@ import urllib
 class httpclient:
     JWAPIURL = "api.jingwei.com"
 
-    def __init__(self, host=JWAPIURL, port='80'):
-        self.host = host
-        self.port = port
+    # use a URL with port number if need to specify a port, by default is 80
+    # Example: http://www.foo.org:8080/hello/iamhere.html
+    def __init__(self, url):
+        self.url = url
+        self.host = self.gethostofurl(url)
+        self.port = self.getportofurl(url)
         pass
 
     def buildbody(self, content):
-        return urllib.urlencode(content)
+        # if the content is raw string, pass it to the request
+        # else, if it's a dictionary, build the request body.
+        if content and isinstance(content, dict):
+            body = urllib.urlencode(content)
+            return body
 
     def gethostofurl(self, url):
         url = url.lstrip('htp:/')
@@ -38,35 +45,21 @@ class httpclient:
         else:
             return 80
 
-    def dorequest(self, method, url, content, header):
-        # If the host / port had been initialized, use the default value.
-        if not self.host:
-            self.host = self.gethostofurl(url)
-        if not self.port:
-            self.port = self.getportofurl(url)
-        if method.lower() == 'get':
-            method = 'GET'
-        elif method.lower() == 'post':
-            method = 'POST'
-
-        # if the content is raw string, pass it to the request
-        # else, if it's a dictionary, build the request body.
-        body = content 
-        if isinstance(content, dict):
-            body = urllib.urlencode(content)
-
-        print self.host + ':' + self.port
+    # The content could be a String, or a dictionary, the buildbody method will convert the map to a string with URL encoding.
+    # The header should be a map type, or it will be ignore.
+    def dorequest(self, method='get', content=None, header=None):
+        method = method.upper()
+        body = self.buildbody(content)
         conn = httplib.HTTPConnection(self.host, self.port)
-
-        if isinstance(header, dict):
-            conn.request(method, url, body, header)
+        if header and isinstance(header, map):
+            conn.request(method, self.url, body, header)
         else:
-            conn.request(method, url, body)
+            conn.request(method, self.url, body)
         
         resp = conn.getresponse()
         return resp
         
-if __name__ == '__main__' and len(sys.argv) >= 2:
-    hc = httpclient()
-    resp = hc.dorequest('get', 'http://www.douban.com/', None, '')
-    #print resp.read()
+if __name__ == '__main__': 
+    hc = httpclient('http://www.douban.com/')
+    resp = hc.dorequest()
+    print resp.read()
