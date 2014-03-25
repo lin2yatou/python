@@ -7,10 +7,9 @@ import httplib
 import urllib
 
 class httpclient:
-    def __init__(self):
-        pass
-        
-    def __init__(self, host, port='80'):
+    JWAPIURL = "api.jingwei.com"
+
+    def __init__(self, host=JWAPIURL, port='80'):
         self.host = host
         self.port = port
         pass
@@ -68,7 +67,6 @@ class httpclient:
         return resp
         
 if __name__ == '__main__' and len(sys.argv) >= 2:
-    hc = httpclient('')
-    print hc.buildbody({'name':'nanan','age':'27'})
+    hc = httpclient()
     resp = hc.dorequest('get', 'http://www.douban.com/', None, '')
     #print resp.read()
