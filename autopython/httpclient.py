@@ -11,10 +11,12 @@ class httpclient:
         pass
         
     def __init__(self, host, port='80'):
+        self.host = host
+        self.port = port
         pass
 
     def buildbody(self, content):
-        return urllib.urlencde(content)
+        return urllib.urlencode(content)
 
     def gethostofurl(self, url):
         url = url.lstrip('htp:/')
@@ -27,6 +29,7 @@ class httpclient:
         if host.find(':') > 0:
             host = host[0:host.find(':')]
         return host
+
     def getportofurl(self, url):
         url = url.lstrip('htp:/')
         indexofcolon = url.find(':')
@@ -36,28 +39,36 @@ class httpclient:
         else:
             return 80
 
-    def doget(self, url, content, header):
-        host = self.gethostofurl(url)
-        port = self.getportofurl(url)
-        body = urllib.urlencode(content)
-        conn = httplib.HTTPConnection(host, port)
-        conn.request('GET', url, body, header)
-        resp = conn.getresponse()
-        return resp
+    def dorequest(self, method, url, content, header):
+        # If the host / port had been initialized, use the default value.
+        if not self.host:
+            self.host = self.gethostofurl(url)
+        if not self.port:
+            self.port = self.getportofurl(url)
+        if method.lower() == 'get':
+            method = 'GET'
+        elif method.lower() == 'post':
+            method = 'POST'
 
-    def dopost(self, url, content, header):
-        host = self.gethostofurl(url)
-        port = self.getportofurl(url)
-        body = urllib.urlencode(content)
-        conn = httplib.HTTPConnection(host, port)
-        conn.request('POST', url, body, header)
-        resp = conn.getresponse()
-        return resp
+        # if the content is raw string, pass it to the request
+        # else, if it's a dictionary, build the request body.
+        body = content 
+        if isinstance(content, dict):
+            body = urllib.urlencode(content)
 
+        print self.host + ':' + self.port
+        conn = httplib.HTTPConnection(self.host, self.port)
+
+        if isinstance(header, dict):
+            conn.request(method, url, body, header)
+        else:
+            conn.request(method, url, body)
         
-if len(sys.argv) >= 2:
+        resp = conn.getresponse()
+        return resp
+        
+if __name__ == '__main__' and len(sys.argv) >= 2:
     hc = httpclient('')
     print hc.buildbody({'name':'nanan','age':'27'})
-    resp = hc.doget('http://www.douban.com/','','')
+    resp = hc.dorequest('get', 'http://www.douban.com/', None, '')
     #print resp.read()
-        
