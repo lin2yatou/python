@@ -6,19 +6,20 @@ import urllib2
 import json
 
 class netcore:
-	def __init__(self, host):
-		self.host=host
+    def __init__(self, host):
+        self.host=host
+        self.to=6
 
-	def get(self, path=""):
-		req = urllib2.Request(self.host+path)
-		resp = urllib2.urlopen(req)
-		return resp.read()
+    def get(self, path=""):
+        req = urllib2.Request(self.host+path)
+        resp = urllib2.urlopen(req,timeout=self.to)
+        return resp.read()
 
-	def post(self, path='', data=''):
-		req = urllib2.Request(self.host+path)
-		req.add_data(data)
-		resp = urllib2.urlopen(req)
-		return resp.read()
+    def post(self, path='', data=''):
+    	req = urllib2.Request(self.host+path)
+    	req.add_data(data)
+    	resp = urllib2.urlopen(req,timeout=self.to)
+        return resp.read()
 
 if __name__ == "__main__":
 	nc = netcore("http://www.jingwei.com/")
